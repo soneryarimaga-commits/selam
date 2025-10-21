@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Evet mi Hayır mı? (Sinematik Mobil)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Kontrol Edilebilir Renk Değişkenleri */
+            --default-bg: #f5f5f5; /* Çok açık gri */
+            --final-bg: #27ae60; /* Yeşil */
+            --tease-bg: #fff1f0; /* Açık pembe/krem */
+            --text-color: #1a1a1a;
+        }
+
+        body {
+            text-align: center;
+            background-color: var(--default-bg);
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-color);
+            transition: background-color 0.8s ease, color 0.8s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px 10px; /* Mobil padding */
+            overflow-x: hidden; /* Yatay kaydırmayı engelle */
+        }
+        h1 {
+            margin-top: 20px;
+            font-size: clamp(1.5rem, 6vw, 2.2rem); /* Daha büyük başlık */
+            max-width: 90vw; /* Mobil genişliği */
+            font-weight: 700;
+            line-height: 1.3;
+        }
+        .emoji {
+            /* Emojiler daha büyük ve net */
+            font-size: clamp(6rem, 20vw, 10rem); 
+            margin: 30px 0 50px 0;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Sıçrama efekti */
+        }
+        .buttons-container {
+            display: flex;
+            /* BUTONLAR ARASI BOŞLUK ARTIRILDI */
+            gap: clamp(30px, 8vw, 50px); 
+            align-items: center;
+            /* BUTONLARI KENARDAN UZAKLAŞTIRDIK */
+            padding: 0 clamp(20px, 5vw, 50px); 
+            width: 100%;
+            box-sizing: border-box; /* Padding'in genişliği artırmamasını sağla */
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        button {
+            font-size: clamp(1rem, 4vw, 1.4rem);
+            font-weight: 700;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            /* GPU ivmeli geçişler */
+            transition: all 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s ease;
+            /* Flex ile mobil uyum */
+            flex-shrink: 0; 
+        }
+        #yes {
+            background-color: #27ae60;
+            min-width: 100px;
+        }
+        #no {
+            background-color: #e74c3c;
+            min-width: 100px;
+        }
+
+        /* Tıklama Efekti */
+        button:active {
+            transform: scale(0.95) !important; 
+        }
+
+        /* Final Sahnesi Stil Ayarı */
+        .final-yes-style {
+            /* Final butonu stil ayarları */
+            font-size: clamp(2rem, 8vw, 4rem) !important; 
+            width: 90vw !important; /* Mobil ekranı kapla */
+            height: clamp(200px, 40vh, 500px);
+            border-radius: 30px !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            transition: all 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55) !important;
+        }
+
+        /* Alaycı Mesaj */
+        #tease {
+            opacity: 0;
+            margin-top: 30px;
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            color: #555;
+            font-style: italic;
+            transition: opacity 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <h1 id="text">Seninle konuşmak için telefon numaranı alabilir miyim? 😉</h1>
+    <div class="emoji" id="emoji">💅</div> 
+
+    <div class="buttons-container">
+        <button id="yes">Evet</button>
+        <button id="no">Hayır</button>
+    </div>
+
+    <p id="tease"></p>
+
+    <script>
+        const text = document.getElementById("text");
+        const emoji = document.getElementById("emoji");
+        const yesBtn = document.getElementById("yes");
+        const noBtn = document.getElementById("no");
+        const tease = document.getElementById("tease");
+
+        let noClicks = 0;
+        let baseYesScale = 1; 
+        
+        const updateButtonSizes = () => {
+            const YES_GROW_FACTOR = 1.3; 
+            const NO_SHRINK_FACTOR = 0.7; 
+            
+            const currentYesScale = baseYesScale * Math.pow(YES_GROW_FACTOR, noClicks);
+            const currentNoScale = Math.pow(NO_SHRINK_FACTOR, noClicks);
+            
+            const finalNoScale = Math.max(0.25, currentNoScale); 
+
+            yesBtn.style.transform = `scale(${currentYesScale})`;
+            noBtn.style.transform = `scale(${finalNoScale})`;
+        }
+
+        noBtn.addEventListener("click", () => {
+            noClicks++;
+            document.body.style.backgroundColor = 'var(--default-bg)'; 
+            document.body.style.color = 'var(--text-color)'; 
+            yesBtn.classList.remove('final-yes-style'); 
+            yesBtn.style.width = 'auto'; 
+            yesBtn.style.fontSize = 'clamp(1rem, 4vw, 1.4rem)'; 
+
+            updateButtonSizes(); 
+
+            switch (noClicks) {
+                case 1:
+                    text.innerText = "Tamam işlerin vardır ama, numarayı verebilirsin bence 😉";
+                    emoji.innerText = "💁‍♀️"; 
+                    break;
+                case 2:
+                    text.innerText = "Hey, buna gerçekten ihtiyacım var, seninle konuşmalıyım 🥺";
+                    emoji.innerText = "😔"; 
+                    break;
+                case 3:
+                    text.innerText = "Biraz nazlıyız sanki... Kızlarda adet mi bu, hm? 😅";
+                    emoji.innerText = "😊"; 
+                    document.body.style.backgroundColor = 'var(--tease-bg)'; 
+                    break;
+                case 4:
+                    text.innerText = "Bak seni kimsenin daha önce kaydetmediği gibi kaydedeceğim... Ona göre iyi düşün 💖";
+                    emoji.innerText = "💖"; 
+                    break;
+                case 5:
+                    text.innerText = "Ciddi misin? Hadi ama lütfen 😭";
+                    emoji.innerText = "😭"; 
+                    break;
+                case 6:
+                    // FINAL AŞAMASI (Sinematik Büyüme)
+                    document.body.style.backgroundColor = 'var(--final-bg)';
+                    document.body.style.color = 'white';
+                    text.innerText = "EVET diyeceğini biliyordum tatlım! 🎉 Numaranı bekliyorum canım! 🥰";
+                    emoji.innerText = "🎉🥳"; 
+                    noBtn.style.display = "none";
+                    
+                    // Yes butonuna özel final stilini uygula
+                    yesBtn.classList.add('final-yes-style');
+                    break;
+                default:
+                    text.innerText = "Artık kaçış yok bebeğim! 🎉";
+            }
+        });
+
+        yesBtn.addEventListener("click", () => {
+            if (noClicks < 6) {
+                tease.innerText = "Hemen 'Evet' mi diyeceksin? Biraz daha 'Hayır'ı denemelisin bence 😉";
+                tease.style.opacity = 1;
+                
+                // Kaybolma efekti
+                yesBtn.style.opacity = 0;
+                yesBtn.style.pointerEvents = 'none';
+
+                setTimeout(() => {
+                    tease.style.opacity = 0;
+                    yesBtn.style.opacity = 1;
+                    yesBtn.style.pointerEvents = 'auto';
+                    
+                    if (noClicks === 0) {
+                         text.innerText = "Seninle konuşmak için telefon numaranı alabilir miyim? 😉";
+                         emoji.innerText = "💅";
+                    }
+                }, 1800);
+                
+            } else {
+                // SMS ekranını aç
+                window.location.href = "sms:0535XXXXXXX?body=Evet dedim, içimden geldi :)";
+            }
+        });
+    </script>
+
+</body>
+</html>
